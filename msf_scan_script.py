@@ -5,7 +5,7 @@ import time
 client = MsfRpcClient('password', port=55552)
 
 # 定义要扫描的主机
-targets = ['122.10.110.174']
+targets = ['122.10.110.174', '192.168.1.1', '192.168.1.2']  # 添加多个目标以测试
 
 # 定义要使用的扫描模块（此处使用不同的模块示例）
 scanners = [
@@ -24,48 +24,44 @@ for scanner in scanners:
             # 设置已知的选项 RHOSTS 和其他相关选项
             if 'RHOSTS' in module.options:
                 module['RHOSTS'] = target
-                module['ConnectTimeout'] = 30
-                print(f"Successfully set RHOSTS to {target} and ConnectTimeout to 30")
+                print(f"Successfully set RHOSTS to {target}")
             else:
                 print(f"Module {scanner} does not have a RHOSTS option")
                 continue
             
             job_id = module.execute()
             print(f"Started job {job_id} for scanner {scanner} on target {target}")
+
+            # 等待并检查扫描结果
+            time.sleep(5)  # 等待一段时间以获取初步结果
+
+            # 获取并显示扫描结果
+            result = client.jobs.info(job_id)
+            print(f"Job {job_id} finished with result: {result}")
+
+            # 检查并处理扫描模块的具体结果
+            if 'data' in result:
+                print(f"Scan data: {result['data']}")
+            else:
+                print(f"No data found for job {job_id}")
+
+            # 打印扫描过程中收集的详细信息
+            if 'log' in result:
+                logs = result['log']
+                for log in logs:
+                    print(log)
+            else:
+                print(f"No log data found for job {job_id}")
+
         except Exception as e:
             print(f"Failed to start job for scanner {scanner} on target {target}: {e}")
 
-# 等待扫描结果
-time.sleep(30)  # 等待扫描完成
+        finally:
+            # 停止该任务以便清理环境
+            client.jobs.stop(job_id)
 
-# 获取并显示扫描结果
-for job_id in client.jobs.list.keys():
-    result = client.jobs.info(job_id)
-    print(f"Job {job_id} finished with result: {result}")
+print("Scanning completed.")
 
-    # 检查并处理扫描模块的具体结果
-    if 'data' in result:
-        print(f"Scan data: {result['data']}")
-    else:
-        print(f"No data found for job {job_id}")
-
-    # 打印扫描过程中收集的详细信息
-    if 'log' in result:
-        logs = result['log']
-        for log in logs:
-            print(log)
-    else:
-        print(f"No log data found for job {job_id}")
-
-    # 获取模块的详细报告
-    uuid = result.get('uuid')
-    if uuid:
-        reports = client.call('report.list')
-        for report in reports:
-            if report.get('uuid') == uuid:
-                print(f"Report for job {job_id}: {report}")
-    else:
-        print(f"No UUID found for job {job_id}")
 
 
 
