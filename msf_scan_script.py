@@ -21,19 +21,10 @@ for scanner in scanners:
             print(f"Successfully loaded module {scanner}")
             print(f"Module options: {module.options}")
 
-            # 打印每个选项的类型和值
-            for option, value in module.options.items():
-                print(f"Option {option}: {value} (type: {type(value)})")
-
-            # 检查并设置 RHOSTS 选项
+            # 设置已知的选项 RHOSTS
             if 'RHOSTS' in module.options:
-                print(f"RHOSTS option type: {type(module.options['RHOSTS'])}")
-                if not isinstance(module.options['RHOSTS'], bool):
-                    module['RHOSTS'] = target
-                    print(f"Successfully set RHOSTS to {target}")
-                else:
-                    print(f"RHOSTS option is of incorrect type: {module.options['RHOSTS']}")
-                    continue
+                module['RHOSTS'] = target
+                print(f"Successfully set RHOSTS to {target}")
             else:
                 print(f"Module {scanner} does not have a RHOSTS option")
                 continue
@@ -48,5 +39,6 @@ time.sleep(10) # 等待扫描完成
 for job_id in client.jobs.list.keys():
     result = client.jobs.info(job_id)
     print(f"Job {job_id} finished with result: {result}")
+
 
 
