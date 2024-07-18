@@ -79,7 +79,27 @@ def scan_targets(client, targets, scanner):
 
 def main():
     parser = argparse.ArgumentParser(description="Metasploit Automation Script")
-    parser.add_argument('--list
+    parser.add_argument('--list-modules', action='store_true', help="List all available modules")
+    parser.add_argument('--scan', action='store_true', help="Scan specified targets")
+    parser.add_argument('--targets', nargs='+', help="List of target IPs")
+    parser.add_argument('--module', type=str, help="Module to use for scanning")
+
+    args = parser.parse_args()
+
+    # 连接到Metasploit RPC服务器
+    client = MsfRpcClient('password', port=55552)
+
+    if args.list_modules:
+        list_all_modules(client)
+
+    if args.scan:
+        if not args.targets or not args.module:
+            parser.error("--scan requires --targets and --module arguments.")
+        scan_targets(client, args.targets, args.module)
+
+if __name__ == '__main__':
+    main()
+
 
 
 
