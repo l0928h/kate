@@ -37,7 +37,7 @@ def scan_targets(client, targets, scanners):
     for scanner in scanners:
         for target in targets:
             try:
-                print(f"\nAttempting to load module {scanner}")
+                print(f"\nAttempting to load module {scanner} for target {target}")
                 module = client.modules.use('auxiliary', scanner)
                 print(f"Successfully loaded module {scanner}")
                 print(f"Module options: {module.options}")
@@ -146,6 +146,7 @@ def main():
 
 if __name__ == '__main__':
     main()
+
 
 
 
