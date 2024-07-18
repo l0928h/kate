@@ -17,7 +17,7 @@ def list_all_modules(client):
     
     for module_type, rpc_call in module_types.items():
         try:
-            module_list = client.call(rpc_call)
+            module_list = client.modules.list[module_type]
             print(f"\nListing {module_type} modules:")
             for module in module_list:
                 print(module)
@@ -99,6 +99,9 @@ def main():
 
 if __name__ == '__main__':
     main()
+
+
+
 
 
 
