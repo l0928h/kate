@@ -6,40 +6,30 @@ def list_all_modules(client):
     """
     列出所有可用的模块
     """
-    try:
-        exploits = client.modules.exploits
-        auxiliaries = client.modules.auxiliary
-        posts = client.modules.post
-        payloads = client.modules.payloads
-        encoders = client.modules.encoders
-        nops = client.modules.nops
-
-        print("\nListing exploit modules:")
-        for module in exploits:
-            print(module)
-
-        print("\nListing auxiliary modules:")
-        for module in auxiliaries:
-            print(module)
-
-        print("\nListing post modules:")
-        for module in posts:
-            print(module)
-
-        print("\nListing payload modules:")
-        for module in payloads:
-            print(module)
-
-        print("\nListing encoder modules:")
-        for module in encoders:
-            print(module)
-
-        print("\nListing nop modules:")
-        for module in nops:
-            print(module)
-
-    except Exception as e:
-        print(f"Failed to list modules: {e}")
+    module_types = {
+        'exploit': client.modules.exploits,
+        'auxiliary': client.modules.auxiliary,
+        'post': client.modules.post,
+        'payload': client.modules.payloads,
+        'encoder': client.modules.encoders,
+        'nop': client.modules.nops
+    }
+    
+    for module_type, modules in module_types.items():
+        try:
+            print(f"\nListing {module_type} modules:")
+            print("{:<5} {:<70} {:<15} {:<10} {:<6} {}".format("ID", "Name", "Disclosure Date", "Rank", "Check", "Description"))
+            print("-" * 120)
+            for idx, module in enumerate(modules):
+                mod = client.modules.use(module_type, module)
+                name = mod.name
+                disclosure_date = mod.description.get('disclosure_date', 'N/A')
+                rank = mod.rank
+                check = 'Yes' if mod.check else 'No'
+                description = mod.description.get('description', 'N/A')
+                print("{:<5} {:<70} {:<15} {:<10} {:<6} {}".format(idx, name, disclosure_date, rank, check, description))
+        except Exception as e:
+            print(f"Failed to list {module_type} modules: {e}")
 
 def scan_targets(client, targets, scanner):
     """
@@ -116,6 +106,7 @@ def main():
 
 if __name__ == '__main__':
     main()
+
 
 
 
