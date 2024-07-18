@@ -1,11 +1,29 @@
 from pymetasploit3.msfrpc import MsfRpcClient
 import time
 
+def list_all_modules(client):
+    """
+    列出所有可用的模块
+    """
+    modules = client.call('module.stats')
+    for module_type, count in modules.items():
+        print(f"{module_type}: {count} modules")
+        
+    module_types = ['exploit', 'auxiliary', 'post', 'payload', 'encoder', 'nop']
+    for module_type in module_types:
+        print(f"\nListing {module_type} modules:")
+        module_list = client.call('module.list', module_type)
+        for module in module_list:
+            print(module)
+
 # 连接到Metasploit RPC服务器
 client = MsfRpcClient('password', port=55552)
 
+# 列出所有可用的模块
+list_all_modules(client)
+
 # 定义要扫描的主机
-targets = ['122.10.110.174', '154.93.166.93', '154.218.67.139']  # 添加多个目标以测试
+targets = ['122.10.110.174', '154.218.67.139', '154.80.196.141']  # 添加多个目标以测试
 
 # 定义要使用的扫描模块（此处使用不同的模块示例）
 scanners = [
@@ -61,6 +79,7 @@ for scanner in scanners:
             client.jobs.stop(job_id)
 
 print("Scanning completed.")
+
 
 
 
