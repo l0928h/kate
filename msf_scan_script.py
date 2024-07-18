@@ -5,16 +5,15 @@ def list_all_modules(client):
     """
     列出所有可用的模块
     """
-    modules = client.call('module.stats')
-    for module_type, count in modules.items():
-        print(f"{module_type}: {count} modules")
-        
     module_types = ['exploit', 'auxiliary', 'post', 'payload', 'encoder', 'nop']
     for module_type in module_types:
-        print(f"\nListing {module_type} modules:")
-        module_list = client.call('module.list', module_type)
-        for module in module_list:
-            print(module)
+        try:
+            module_list = client.call('module.get', [module_type])
+            print(f"\nListing {module_type} modules:")
+            for module in module_list:
+                print(module)
+        except Exception as e:
+            print(f"Failed to list {module_type} modules: {e}")
 
 # 连接到Metasploit RPC服务器
 client = MsfRpcClient('password', port=55552)
@@ -75,10 +74,8 @@ for scanner in scanners:
             print(f"Failed to start job for scanner {scanner} on target {target}: {e}")
 
         finally:
-            # 停止该任务以便清理环境
-            client.jobs.stop(job_id)
+         
 
-print("Scanning completed.")
 
 
 
