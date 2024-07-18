@@ -6,23 +6,40 @@ def list_all_modules(client):
     """
     列出所有可用的模块
     """
-    module_types = {
-        'exploit': 'module.exploits',
-        'auxiliary': 'module.auxiliary',
-        'post': 'module.post',
-        'payload': 'module.payloads',
-        'encoder': 'module.encoders',
-        'nop': 'module.nops'
-    }
-    
-    for module_type, rpc_call in module_types.items():
-        try:
-            module_list = client.modules.list[module_type]
-            print(f"\nListing {module_type} modules:")
-            for module in module_list:
-                print(module)
-        except Exception as e:
-            print(f"Failed to list {module_type} modules: {e}")
+    try:
+        exploits = client.modules.exploits
+        auxiliaries = client.modules.auxiliary
+        posts = client.modules.post
+        payloads = client.modules.payloads
+        encoders = client.modules.encoders
+        nops = client.modules.nops
+
+        print("\nListing exploit modules:")
+        for module in exploits:
+            print(module)
+
+        print("\nListing auxiliary modules:")
+        for module in auxiliaries:
+            print(module)
+
+        print("\nListing post modules:")
+        for module in posts:
+            print(module)
+
+        print("\nListing payload modules:")
+        for module in payloads:
+            print(module)
+
+        print("\nListing encoder modules:")
+        for module in encoders:
+            print(module)
+
+        print("\nListing nop modules:")
+        for module in nops:
+            print(module)
+
+    except Exception as e:
+        print(f"Failed to list modules: {e}")
 
 def scan_targets(client, targets, scanner):
     """
@@ -99,6 +116,7 @@ def main():
 
 if __name__ == '__main__':
     main()
+
 
 
 
