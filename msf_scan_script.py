@@ -18,16 +18,15 @@ def list_all_modules(client):
     for module_type, modules in module_types.items():
         try:
             print(f"\nListing {module_type} modules:")
-            print("{:<5} {:<70} {:<15} {:<10} {:<6} {}".format("ID", "Name", "Disclosure Date", "Rank", "Check", "Description"))
-            print("-" * 120)
+            print("{:<5} {:<70} {:<15} {:<10} {:<6}".format("ID", "Name", "Disclosure Date", "Rank", "Check"))
+            print("-" * 110)
             for idx, module in enumerate(modules):
                 mod = client.modules.use(module_type, module)
                 name = module
                 disclosure_date = mod.info.get('disclosure_date', 'N/A')
                 rank = mod.info.get('rank', 'N/A')
                 check = 'Yes' if mod.info.get('check', False) else 'No'
-                description = mod.info.get('description', 'N/A')
-                print("{:<5} {:<70} {:<15} {:<10} {:<6} {}".format(idx, name, disclosure_date, rank, check, description))
+                print("{:<5} {:<70} {:<15} {:<10} {:<6}".format(idx, name, disclosure_date, rank, check))
         except Exception as e:
             print(f"Failed to list {module_type} modules: {e}")
 
@@ -106,6 +105,7 @@ def main():
 
 if __name__ == '__main__':
     main()
+
 
 
 
