@@ -77,6 +77,7 @@ def scan_targets(client, targets, scanners):
 
             except Exception as e:
                 print(f"Failed to start job for scanner {scanner} on target {target}: {e}")
+                continue
 
             finally:
                 # 停止该任务以便清理环境
@@ -124,8 +125,12 @@ def main():
 
     # 连接到Metasploit RPC服务器
     print("Connecting to Metasploit RPC server...")
-    client = MsfRpcClient('password', port=55552)
-    print("Connected to Metasploit RPC server.")
+    try:
+        client = MsfRpcClient('password', port=55552)
+        print("Connected to Metasploit RPC server.")
+    except Exception as e:
+        print(f"Failed to connect to Metasploit RPC server: {e}")
+        return
 
     if args.list_modules:
         list_all_modules(client)
@@ -147,6 +152,7 @@ def main():
 
 if __name__ == '__main__':
     main()
+
 
 
 
