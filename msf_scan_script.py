@@ -1,3 +1,4 @@
+import argparse
 from pymetasploit3.msfrpc import MsfRpcClient
 import time
 
@@ -8,29 +9,17 @@ def list_all_modules(client):
     module_types = ['exploit', 'auxiliary', 'post', 'payload', 'encoder', 'nop']
     for module_type in module_types:
         try:
-            module_list = client.call('module.get', [module_type])
+            module_list = client.call('module.list', module_type)
             print(f"\nListing {module_type} modules:")
             for module in module_list:
                 print(module)
         except Exception as e:
             print(f"Failed to list {module_type} modules: {e}")
 
-# 连接到Metasploit RPC服务器
-client = MsfRpcClient('password', port=55552)
-
-# 列出所有可用的模块
-list_all_modules(client)
-
-# 定义要扫描的主机
-targets = ['122.10.110.174', '154.218.67.139', '154.80.196.141']  # 添加多个目标以测试
-
-# 定义要使用的扫描模块（此处使用不同的模块示例）
-scanners = [
-    'auxiliary/scanner/smb/smb_ms17_010'
-]
-
-# 遍历每个扫描模块和目标
-for scanner in scanners:
+def scan_targets(client, targets, scanner):
+    """
+    扫描指定的目标
+    """
     for target in targets:
         try:
             print(f"\nAttempting to load module {scanner}")
@@ -74,6 +63,36 @@ for scanner in scanners:
             print(f"Failed to start job for scanner {scanner} on target {target}: {e}")
 
         finally:
+            # 停止该任务以便清理环境
+            try:
+                client.jobs.stop(job_id)
+            except Exception as e:
+                print(f"Failed to stop job {job_id}: {e}")
+
+def main():
+    parser = argparse.ArgumentParser(description="Metasploit Automation Script")
+    parser.add_argument('--list-modules', action='store_true', help="List all available modules")
+    parser.add_argument('--scan', action='store_true', help="Scan specified targets")
+    parser.add_argument('--targets', nargs='+', help="List of target IPs")
+    parser.add_argument('--module', type=str, help="Module to use for scanning")
+
+    args = parser.parse_args()
+
+    # 连接到Metasploit RPC服务器
+    client = MsfRpcClient('password', port=55552)
+
+    if args.list_modules:
+        list_all_modules(client)
+
+    if args.scan:
+        if not args.targets or not args.module:
+            parser.error("--scan requires --targets and --module arguments.")
+        scan_targets(client, args.targets, args.module)
+
+if __name__ == '__main__':
+    main()
+
+
          
 
 
