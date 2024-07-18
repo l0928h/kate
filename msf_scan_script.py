@@ -51,15 +51,23 @@ def scan_targets(client, targets, scanners):
                     continue
                 
                 print(f"Executing module {scanner} on target {target}...")
-                job_id = module.execute()
-                print(f"Started job {job_id} for scanner {scanner} on target {target}")
+                try:
+                    job_id = module.execute()
+                    print(f"Started job {job_id} for scanner {scanner} on target {target}")
+                except Exception as e:
+                    print(f"Failed to start job for scanner {scanner} on target {target}: {e}")
+                    continue
 
                 # 等待并检查扫描结果
                 time.sleep(5)  # 等待一段时间以获取初步结果
 
                 # 获取并显示扫描结果
-                result = client.jobs.info(job_id)
-                print(f"Job {job_id} finished with result: {result}")
+                try:
+                    result = client.jobs.info(job_id)
+                    print(f"Job {job_id} finished with result: {result}")
+                except Exception as e:
+                    print(f"Failed to get job info for job {job_id}: {e}")
+                    continue
 
                 # 检查并处理扫描模块的具体结果
                 if 'data' in result:
@@ -76,8 +84,7 @@ def scan_targets(client, targets, scanners):
                     print(f"No log data found for job {job_id}")
 
             except Exception as e:
-                print(f"Failed to start job for scanner {scanner} on target {target}: {e}")
-                continue
+                print(f"Error during scanning with scanner {scanner} on target {target}: {e}")
 
             finally:
                 # 停止该任务以便清理环境
@@ -152,6 +159,7 @@ def main():
 
 if __name__ == '__main__':
     main()
+
 
 
 
