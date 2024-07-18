@@ -50,6 +50,7 @@ def scan_targets(client, targets, scanners):
                     print(f"Module {scanner} does not have a RHOSTS option")
                     continue
                 
+                print(f"Executing module {scanner} on target {target}...")
                 job_id = module.execute()
                 print(f"Started job {job_id} for scanner {scanner} on target {target}")
 
@@ -146,6 +147,7 @@ def main():
 
 if __name__ == '__main__':
     main()
+
 
 
 
