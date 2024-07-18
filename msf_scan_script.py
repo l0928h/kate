@@ -91,6 +91,7 @@ def load_targets_from_file(file_path):
     try:
         with open(file_path, 'r') as file:
             targets = [line.strip() for line in file if line.strip()]
+        print(f"Loaded targets from file {file_path}: {targets}")
         return targets
     except Exception as e:
         print(f"Failed to read targets from file {file_path}: {e}")
@@ -103,6 +104,7 @@ def load_modules_from_file(file_path):
     try:
         with open(file_path, 'r') as file:
             modules = [line.strip() for line in file if line.strip()]
+        print(f"Loaded modules from file {file_path}: {modules}")
         return modules
     except Exception as e:
         print(f"Failed to read modules from file {file_path}: {e}")
@@ -120,7 +122,9 @@ def main():
     args = parser.parse_args()
 
     # 连接到Metasploit RPC服务器
+    print("Connecting to Metasploit RPC server...")
     client = MsfRpcClient('password', port=55552)
+    print("Connected to Metasploit RPC server.")
 
     if args.list_modules:
         list_all_modules(client)
@@ -137,10 +141,12 @@ def main():
         if not targets or not modules:
             parser.error("--scan requires --targets or --target-file and --modules or --module-file arguments.")
         
+        print(f"Starting scan on targets: {targets} with modules: {modules}")
         scan_targets(client, targets, modules)
 
 if __name__ == '__main__':
     main()
+
 
 
 
