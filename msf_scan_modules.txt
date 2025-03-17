@@ -1,5 +1,0 @@
-auxiliary/scanner/http/joomla_api_improper_access_checks
-auxiliary/scanner/http/wp_paid_membership_pro_code_sqli
-auxiliary/scanner/http/wp_woocommerce_payments_add_user
-auxiliary/scanner/msmq/cve_2023_21554_queuejumper
-auxiliary/scanner/http/citrix_bleed_cve_2023_4966
