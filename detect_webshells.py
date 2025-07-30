@@ -1,15 +1,16 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-detect_webshells.py (multithreaded 改版)
+detect_webshells.py (multithreaded 改版，支持指定路径强制成功检测)
 
 用法:
-    python detect_webshells.py --input targets.txt [--threads 10]
+    python detect_webshells_multithread.py --input targets.txt [--threads 10]
 
 脚本说明:
     - 从文件读取目标域名或 URL 列表
     - 若未指定协议，依序尝试 https:// 和 http://
     - 并行请求每个 URL，获取 HTTP 回应码并匹配 Webshell 登录表单特征
+    - 支持对特定路径（如 angel.php）强制标记为成功
     - 将结果即时输出至屏幕，并实时写入 CSV 文件
     - CSV 列：url、status（HTTP 回应码 或 错误信息）、has_webshell（Yes/No）
 """
@@ -22,6 +23,7 @@ import threading
 import requests
 from requests.exceptions import RequestException
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from urllib.parse import urlparse
 
 # --- 特征码列表（正则） ---
 signatures = [
@@ -31,9 +33,13 @@ signatures = [
     re.compile(r'<input[^>]*type=["\']hidden["\'][^>]*name=["\']action["\'][^>]*value=["\']login["\']', re.IGNORECASE),
 ]
 
+# --- 强制成功检测的路径集合 ---
+force_paths = {'/angel.php'}
+
 def is_webshell(html: str) -> bool:
     """判断页面中是否包含所有特征码"""
     return all(sig.search(html) for sig in signatures)
+
 
 def normalize_targets(lines):
     out = []
@@ -47,6 +53,7 @@ def normalize_targets(lines):
             out.append('https://' + host)
             out.append('http://'  + host)
     return out
+
 
 def detect_and_write(input_file: str, output_file: str = 'results.csv', timeout: float = 3.0, threads: int = 10):
     # 打开 CSV 并写入表头
@@ -69,9 +76,16 @@ def detect_and_write(input_file: str, output_file: str = 'results.csv', timeout:
                 resp = requests.get(url, timeout=timeout, allow_redirects=True)
                 code = resp.status_code
                 html = resp.text
+
+                # 先依据特征码检测，再依据路径强制成功
                 detected = is_webshell(html)
+                parsed = urlparse(url)
+                if parsed.path.lower() in force_paths:
+                    detected = True
+
                 status = code
                 has = 'Yes' if detected else 'No'
+
                 # 控制台输出与写 CSV 都需加锁
                 with lock:
                     if detected:
@@ -80,6 +94,7 @@ def detect_and_write(input_file: str, output_file: str = 'results.csv', timeout:
                         print(f"[-] {code} No shell: {url}")
                     writer.writerow([url, status, has])
                     csvfile.flush()
+
             except RequestException as e:
                 status = f"Error: {e}"
                 has = 'No'
@@ -91,14 +106,14 @@ def detect_and_write(input_file: str, output_file: str = 'results.csv', timeout:
         # 使用 ThreadPoolExecutor 并行处理
         with ThreadPoolExecutor(max_workers=threads) as executor:
             futures = [executor.submit(process_url, url) for url in urls]
-            # 等待所有任务完成
             for _ in as_completed(futures):
                 pass
 
     print(f"[*] 检测结束，结果已实时写入 {output_file}")
 
+
 def main():
-    parser = argparse.ArgumentParser(description="多线程检测 Webshell 登录界面（实时输出 CSV）")
+    parser = argparse.ArgumentParser(description="多线程检测 Webshell 登录界面（支持路径强制成功）")
     parser.add_argument('--input', '-i', required=True,
                         help="目标清单文件，每行域名或 URL")
     parser.add_argument('--output', '-o', default='results.csv',
@@ -112,6 +127,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
 
