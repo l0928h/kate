@@ -53,3 +53,6 @@
 Tools
 
 john --format=bcrypt --wordlist=/usr/share/wordlists/rockyou.txt ~/Desktop/hashes.txt --progress-every=20
+
+
+https://drive.google.com/drive/folders/1RKWhypIdhzj-j7siN-TBppUJd7_rQzwe
